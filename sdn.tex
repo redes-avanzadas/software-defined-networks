@@ -550,25 +550,160 @@ Aquí va el abstract
 % 
 % Here we have the typical use of a "T" for an initial drop letter
 % and "HIS" in caps to complete the first word.
-\IEEEPARstart{T}{his} demo file is intended to serve as a ``starter file''
-for IEEE Computer Society journal papers produced under \LaTeX\ using
-IEEEtran.cls version 1.8a and later.
-% You must have at least 2 lines in the paragraph with the drop letter
-% (should never be an issue)
-I wish you the best of success.
+\IEEEPARstart{L}{as} Redes Definidas por Software  (o SDN por sus siglas en inglés) es una nueva tecnología o paradigma aplicada a las redes con el fin  de aportar agilidad en redes que son estáticas o complejas para aplicar cambios que pueden estar dedicadas a brindar servicios individuales. El concepto de SDN busca la administración de diferentes servicios de forma dinámica aplicados en una infraestructura de hardware común. Por ejemplo, con una red SDN se podría controlar la red según la demanda que esta tenga y sacar provecho al optimizar las cargas de la red.
 
-\hfill mds
+Algunas ventajas de las redes SDN se ven reflejadas en la disminución de gastos en recurso físico, la centralización de la información permitiendo que se pueda analizar la red y crear rutas óptimas de forma determinista, atender de forma dinámica las peticiones de las aplicaciones, optimizan el uso de la red sin sacrificar la calidad del servicio y puede filtrar paquetes que viajan por la red añadiendo seguridad a la red pues se pueden redireccionar paquetes maliciosos.
+
+Las redes SDN surgen de la necesidad de una nueva arquitectura de redes. Parte de las necesidades que se querían cubrir con un nuevo paradigma de red eran: cambiar el tráfico según patrones (definir redes públicas, privadas, etc), manejo de redes ubicadas en diferentes regiones, acceso a la red desde diferentes dispositivos, inicio de los servicios cloud y aumento en almacenamiento de grandes cantidades de datos son algunas de las principales razones para comenzar a ver cambios en la implementación de las redes. 
+
+Las redes tradicionales tienen ciertas limitaciones como la jerarquía en la que se basa su construcción, la complejidad en escalabilidad de dispositivos que requieren nueva programación y configuraciones, dependencia de proveedores, diferencias entre los requerimientos del mercado y  las capacidades de las redes. Estas son solo algunas de las principales razones para buscar una solución que permitiera inyectar dinamismo en la red. 
+
+\section{Breve reseña}
+Aunque el éxito de SDN se ha hecho más palpable recientemente, muchas de las ideas de la tecnología subyacente ha evolucionado por más de 20 años (o más). De algún modo, SDN retoma ideas de las primeras redes telefónicas, que tenían una clara separación de los planos de control y datos para simplificar la administración de la red y la agregación de nuevos servicios. Aún así, interfases abiertas tal y como \textsc{OpenFlow} permiten mayor innovación en las platformas de controladores y aplicaciones que lo que se podía hacer en redes cerradas diseñadas para un limitado rango de servicios telefónicos. De igual forma, SDN parece retomar investigación pasada en \emph{active networking} que introdujo conceptos de para redes programables, aunque con un énfasis en planos de datos programables. SDN también se relaciona con otros trabajos previos en separación de los planos de control y datos en redes de computadoras.
+
+La historia de SDN inició más de 20 años atrás, justo cuando Internet estaba despegando. Muchas de las innovaciones en el comunidad de investigación en redes fueron influenciadas de alguna forma u otra por el progreso de otras áreas tales como sistemas distribuidos, sistemas operativos y lenguajes de programación. Los esfuerzos para crear una infraestructura de red programable también estuvieron claramente relacionados con el trabajo en el soporte programable de procesamiento de paquetes a altas velocidades.
+
+En \cite{rexford} se divide la historia de SDN en tres etapas: 
+\begin{enumerate}
+    \item \textbf{\emph{active networks}} mediados de los 90 a inicios del 2000: que introdujo funciones programables en la red, lo cual condujo a una mayor innovación.
+    \item \textbf{Separación de los planos de control y datos} alrededor del 2001 al 2007, en donde se desarrolló interfases abiertas entre los planos de control y datos.
+    \item \textbf{El API de \textsc{OpenFlow} y sistemas operativos de red} del 2007 al 2010, que representó el primera adopción generalizada de una interfaz abierta y desarrolló forma para hacer la separación de los planos de control y datos escalable.
+\end{enumerate}
+La virtualización de redes también jugó un rol importante a través de la evolución histórica de SDN como uno de los primeros casos de uso significativos para SDN.
+
+\begin{figure*}[h]
+    \center
+    \includegraphics[width=15cm]{sdn-history}
+    \caption{Desarrollos selectos en el campo de redes programables en los últimos 20 años. Tomado de \emph{The Road to SDN}\cite{rexford}.}
+    \label{fig:tradicitional-architecture}
+\end{figure*}
+
+
+\section{Software Defined Networks}
+
+El \textit{Open Network Foundation} -- la organización encargada de promover la implementación de redes SDN y estándares para las mismas - define SDN como la separación física del plano de control (\emph{control plane}) de la red del plano de datos o reenvío (\emph{forwarding plane}), en donde un plano de control controla varios dispositivos\cite{onf}. 
+
+El objetivo de las redes SDN es brindar una interfaz abierta que pueda permitir el desarrollo de software para controlar la conectividad dentro de una red, el flujo y el tráfico.
+La idea central es desacoplar el control de la red del de datos y que además sea programable. Al tener una separación entre la parte lógica y la física se busca abstraer los servicios y las aplicaciones los cuales pueden tratar la red como una entidad lógica o virtual. 
+
+
+\subsection{Arquitectura}
+Los dispositivos de red tradicionales, como un \emph{switch}, tiene 3 planos: el plano de administración, el plano de control y el plano de datos. El plano de administración permite la configuración del dispositivo y el de control, que controla el enrutamiento del tráfico. La tabla de ruteo la llena el plano de control (por un algoritmo de enrutamiento) que a su vez determina cómo el tráfico debería ser enrutado por el hardware. Finalmente, la capa de datos se encarga de este enrutamiento. Uno de los problemas con las redes tradicionales, el cual SDN está intentando cambiar, es que cada dispositivo en la red tiene su propio plano de administración, control y de datos. Si la red tiene 100 \emph{switches}, entonces se tienen 100 planos de administración, 100 de control y 100 de datos. Se tiene que administrar cada dispositivo por separado, cada uno ejecutando un algoritmo distribuido de enrutamiento como \emph{Open Shortest Path first}(OSPF) que tiene que determinar la mejor ruta de un punto de la red al otro y que, con suerte tendrá conocimiento completo de la red o al menos uno bueno de la misma. OSPF y otros algoritmos distribuidos de enrutamiento son complejos y no necesariamente elijen la mejor ruta porque no tienen una vista del tamaño total de la red. 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{traditional-3-tier-device}
+    \caption{Arquitectura de un dispositivo tradicional. Fuente: \emph{Software Defined Networks}\cite{goransson}.}
+    \label{fig:tradicitional-architecture}
+\end{figure}
+
+
+
+
+Con SDN, la idea es remover el ``cerebro'' o la ``inteligencia'' del dispositivo de red y llevarlo a un dispositivo diferente como un \textbf{controlador:} un dispositivo que actúa como un punto de control estratégico -- probablemente compuesto de varios servidores físicos- que controla varios dispositivos de red tanto físicos como virtuales y que tiene mejor conocimiento de la red porque es un único ente controlando la totalidad de red o una porción de la misma. Protocolos como \textsc{OpenFlow} permiten al plano de control manipular el enrutamiento de tráfico a través de la red realizando mejores decisiones a la hora de calcular rutas y de gestionar de la red.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{sdn-architecture-img}
+    \caption{Arquitectura SDN. Fuente: \emph{Open Networking Foundation}}
+    \label{fig:sdn-arquitectura}
+\end{figure}
+
+
+SDN define una arquitectura formada por tres capas distintas como se muestra en la figura \pageref{fig:sdn-arquitectura}:
+\subsubsection*{Capa de infraestructura}
+Se ubica el equipo físico de transferencia (\emph{routers, switches}, etc).
+
+\subsubsection*{Capa de control}
+Se encuentran los \textbf{controladores} SDN y aplicaciones escritas por programadores que interactúan con el controlador utilizando lo que se conoce como la interfaz \emph{Northboud}. Para interactuar con los dispositivos de la red, el controlador usa la interfase \emph{Softboud}. El controlador envía mensajes a los dispositivos usando varios protocolos -- Uno de ellos es \textsc{OpenFlow} - en la intefase \emph{Softbound}. A diferencia de un \emph{switch} o \emph{router} tradicional, en un ambiente SDN puro el cerebro del dispositivo de red es removido del mismo y se coloca en la capa de control en un dispositivo por separado.
+
+%Es una entidad de software que controla la infraestructura de forma dinámica a través de solicitudes que vienen desde la capa de aplicación.
+%Esta puede tomar soluciones informadas para configurar la capa de infraestructura con el fin de que esta sea óptima.
+%La inteligencia de la red es manejada desde la capa de control logrando mantener una vista general de la red, teniendo como resultado un solo switch lógico que opera aplicaciones y políticas. 
+%
+%La capa de control puede proveer protocolos NetFlow, IPFIX, SNMP, entiende la topología de la red y provee enlaces entre dispositivos. 
+%Se puede escalar para que exista más de un controlador para la red (Multiple control/data planes) donde ambos controladores se sincronizan para administrar la red, permitiendo la sincronización entre varios controladores, ``high availability'' y tolerancia a fallos.
+
+\subsubsection*{Capa de aplicación}
+Las aplicaciones en esta capa manipulan el flujo de tráfico a través de la red. SDN permite control sobre toda la red desde un solo punto lo cual simplifica el diseño y el mantenimiento de la red. También reduce el trabajo entre dispositivos de red pues solo necesitan recibir instrucciones de la capa de control en vez de entender y procesar distintos protocolos.
+
+El trabajo de operadores de red también se ve reducido a solo mantener y configurar la capa de control, lo cual les da tiempo para aprovechar en la mejora de la red al implementar inteligencia para alterar el comportamiento de la misma de forma dinámica y responder a las necesidades de clientes. 
+
+La arquitectura SDN soporta un conjunto de intefases de programación (API) para incluir servicios como ruteo, seguridad, control de acceso, manejo de rutas, distribución de cargas, entre otros. SDN promueve el uso de estas APIs que pueden ser de código abierto, dejando de lado el soporte de proveedores. Si por ejemplo se quisiera implementar un nuevo algoritmo de enrutamiento y ponerlo a disposición en los \emph{routers} de un cierto fabricante, este podría negarse a incluirlo. De la misma forma en la que el \emph{Apple Store} o \emph{Google Play} permiten a los programadores de aplicaciones a escribir sus propios programas al proveer interfaces de programación de alto nivel para tener acceso a los recursos de los teléfonos, una de las ideas de SDN es que un programador pueda escribir su propio programa y por medio de la interfaz \emph{Northbound} se pueda controlar el flujo del tráfico de la red. El controlador abstrae la complejidad detrás de la programación de la red y la interfaz abierta en los dispositivos de red permite que el programador controle, por medio del programa que escribió, el flujo del tráfico. Se podría utilizar un lenguaje de alto nivel como Python para programar los circuitos de los \emph{switches} sin tener que enviar mensajes de bajo nivel a dispositivos individuales en la red y cambiarle la configuración. La complejidad de la red se le oculta al programador: se puede escribir una aplicación de alto nivel que manipule el flujo de los datos a través de la red utilizando un protocolo como \textsc{OpenFlow} pero, la complejidad de \textsc{OpenFlow} y la complejidad de los dispositivos de la red están ocultos o abstraídos. De esta forma el programador solamente tiene que tener conocimiento una interfaz de alto nivel para escribir un programa manipule el envío de tráfico de un punto $a$ a un punto $b$.
+
+\subsection{Características Fundamentales de SDN}
+
+\subsubsection{Separación de planos}
+La primer característica fundamenta de SDN es la separación de los planos de control y datos. Funcionalidades de reenvío (\emph{forwarding}) incluyendo las tablas lógicas y las tablas para escoger como lidiar con los paquetes entrantes, basados en características tales como una dirección MAC, dirección IP o una VLAN ID, reside en el plano de datos. Las acciones fundamentales realizadas por el plano de datos pueden ser descritas de acuerdo cómo manejan los paquetes que llegan. Se puede hacer \emph{forward, drop, consume} o \emph{replicate} un paquete entrante. También se puede transformar el paquete de alguna forma antes de tomar una acción posterior. 
+
+La lógica y los algoritmos que son usado para programar el plano de datos reside en el control de datos. Muchos de estos protocolos y algoritmos requieren conocimiento global de la red. El plano de control determina cómo las tablas de reenvío (\emph{forwarding tables}) y la lógica en el plano de datos debería ser programada o configurada. En una red tradicional cada dispositivo tiene su propio plano de control, la tarea primaria de ese plano de control es ejecutar protocolos de ruteo y \emph{switching} de tal forma que todas las tablas de reenvío en los dispositivos en toda la red están sincronizadas.
+
+\subsubsection{Dispositivos simples y control centralizado}
+Los dispositivos son ahora controlados por un sistema centralizado ejecutando software de administración y control. En lugar de cientos o miles de líneas de complicado software de plano de control ejecutándose en el dispositivo y que le permite comportarse de forma autónoma, ese software es removido del dispositivo y puesto en un controlador centralizado. Este controlador basado en software puede entonces gestionar la red. El controlador provee instrucciones primitivas a los dispositivos simplificados cuando sea apropiado con el fin de permitirles hace decisiones más rápidas acerca de cómo manejas los paquetes entrantes.
+
+\subsubsection{Automatización y virtualización de redes}
+El controlador basado en software en SDN provee una interfaz abierta en el mismo para permitir el control automático de la red. En el contexto de Open SDN\footnote{Decir algo de esto - OpenSDN} los términos \emph{northbound} y \emph{southbound} se usan frecuentemente para distinguir si la interfaz es para las aplicaciones o para los dispositivos. Estos términos se derivan del hecho que en la mayoría de los diagramas las aplicaciones se muestra arriba (al norte) del controlador mientras que los dispositivos se muestra en la parte de abajo (al sur) del controlador. El controlador ofrece una \emph{northboud} API que permite que se pueda proporcionar algoritmos y protocolos que pueden hacer que la red trabaje eficientemente. La \emph{northbound} API del controlador pretende brindar una abstraccio4n de los dispositivos de red y la topología, de esta forma, las aplicaciones pueden ser desarrolladas para que trabajen sobre una amplia variedad equipos/fabricantes los cuales pueden diferir substancialmente en los detalles de su implementación.
+
+Uno de los resultados de este nivel de abstracción es proveer la habilidad de virtualizar la red, desacoplar el servicio de la red de la red física subyacente. Esos servicios están aún presentes en los dispositivos \emph{host} de tal forma que esos \emph{hosts} no están concientes que los recursos de la red que están usando son virtuales o no los físico para los cuales fueron diseñados originalmente.
+
+\subsubsection{Apertura}
+Una característica de las redes SDN basadas en \textsc{OpenFlow} es que las interfases deberían de permanecer estándar, bien documentadas y no ser propietarias. Las APIs que son definidas deberían dar al software el suficiente control de varios planos de control. La premisa es que al mantener las interfases \emph{northbound} y \emph{southbound} abiertas en el controlador SDN se permitirá la investigación de nuevos e innovadores métodos para operar una red.
+
+\subsection{Operativa de SDN}
+A nivel conceptual, el comportamiento y operación de una red SDN es sencillo. En la figura \ref{fig:operation-sdn} se proporciona una representación gráfica de la operación de los componentes básicos de SDN: los dispositivos SDN, el controlador y las aplicaciones. La forma más fácil de entender la operación es mirándola de abajo hacia arriba, iniciando por los dispositivos. Los dispositivos SDN contienen funcionalidad de reenvio (\emph{forwarding}) para decidir qué hacer con cada paquete entrante. Los dispositivos también contienen los datos para tomar esas decisiones de reenvio. Los datos como tal son representados por los flujos definidos por el controlador, como se muestra en la parte superior izquierda de cada dispositivo.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=9cm]{operation-sdn}
+    \caption{Visión general de la operativa SDN. Fuente: \emph{Open Networking Foundation}}
+    \label{fig:operation-sdn}
+\end{figure}
+
+Un flujo describe un conjunto de paquetes transferidos desde un punto final de la red (\emph{network endpoint}) hacia otro punto final de la red (o conjunto de puntos). Un conjunto de reglas describe las acciones que el dispositivo debería toma para todos los paquetes que le pertenecen a ese flujo. Un flujo \emph{flow} es unidireccional en que los paquetes que fluyen entre los mismos dos \emph{endpoints}, en la dirección opuesta podrían constituir cada uno un flujo separado. Los flujos se representan en un dispositivo como una entrada de flujo (\emph{flow entry}).
+
+Una tabla de flujos reside en el dispositivo de red y consiste de una serie de entradas de flujo y las acciones a realizar cuando un paquete entrante coincide un flujo. Cuando el dispositivo SDN recibe un paquete, consulta su tabla de flujos en busca de una coincidencia. Estas tablas de flujos se han construido previamente cuando el controlador descargó las reglas de flujo apropiadas al dispositivo. Si el dispositivo SDN encuentra una coincidencia entonces realiza la acción configurada apropiada que usualmente implica reenviar un paquete. Si no encuentra una coincidencia, el dispositivo puede soltar (\emph{drop}) el paquete o pasarlo al controlador, dependiendo de la versión el protocolo y la configuration que tenga. La definición de un flujo es una expresión de programación relativamente simple de lo que lo que puede ser un cálculo de plano de control muy complejo realizado previamente por el controlador.
+
+El controlador SDN es responsable de abstraer la red de los dispositivos SDN que controla y presentar una abstracción de estos recursos de red a las aplicaciones SDN ejecutándonse por encima de sí. El controlador le permite a las aplicaciones SDN a definir flujos en los dispositivos y ayuda a la aplicación a responder a paquetes que fueron reenviados al controlador por los dispositivos SDN. En la figura \ref{fig:operation-sdn} se puede ver en la parte derecha del controlador que se mantiene una vista de la totalidad de la red que controla. Esto permite calcular soluciones de reenvio óptimas de una forma determinística y predecible. Debido a que un controlador puede control un gran número de dispositivos, estos cálculos son normalmente realizados en un equipo de alto rendimiento el cual posee mejor CPU y memoria que los que vienen típicamente en los dispositivos de red.
+
+Las aplicaciones SDN están construidas por encima del controlador. Estas aplicaciones no deberían de confundirse con la capa de aplicación definida en el modelo OSI de siete capas para redes de computadoras. Las aplicaciones SDN se interconectan con el controlador usando un conjunto de flujos proactivos (\emph{proactive}) en los dispositivos y para recibir paquetes que han sido enviados al controlador. Los flujos proactivos los establece la aplicación: típicamente la aplicación va a configurar estos flujos cuando la aplicación inicia. Los flujos van a persistir hasta que algún cambio en la configuracion se haga. Esta clase de flujo se conoce como flujo estático. Otro tipo de flujo proactivo es cuando el controlador decide modificar un flujo basado en la carga del tráfico que se está dando actualmente a través del dispositivo de red.
+
+Además de los flujos definidos proactivamente por la aplicación, algunos flujos son definidos para responder a un paquete enviado al controlador. Al recibir los paquetes entrantes que han sido reenviados al controlador, la aplicación SDN dara instrucciones al controlador para darle a conocer cómo responder al paquete y, si es apropiado, establecerá nuevos flujos en el dispositivo con el fin de permitir que el dispositivo responda localmente la próxima vez que vea un paquete que le pertenezca a ese flujo. Tales flujos se llaman flujos reactivos. De esta forma, ahora es posible escribir aplicaciones de software que implementan envío, ruteo, superposición (\emph{overlay}), \emph{multipath}, funciones de control de acceso, entre otros.
+
+\subsubsection{Dispositivos SDN}
+
+\subsubsection{Controlador SDN}
+
+\subsubsection{Aplicaciones SDN}
+
+
+%\textbf{======================================}
+%Control: se encuentran los controladores SDN y aplicaciones escritas por programadores que interactúan con el controlador utilizando lo que se conoce como la interfase \emph{Northboud}. Para interactuar con los dispositivos de la red, el controlador usa la interfase \emph{Softboud}. El controlador envía mensajes a los dispositivos usando varios protocolos -- Uno de ellos es \textsc{OpenFlow} - en la intefase \emph{Softbound}. A diferencia de un \emph{switch} o \emph{router} tradicional, en un ambiente SDN puro el cerebro del dispositivo de red es removido del mismo y se coloca en la capa de control en un dispositivo por separado.
+
  
-\hfill September 17, 2014
 
-\subsection{Subsection Heading Here}
-Subsection text here.
+
+
+
+%El dispositivo se puede acceder por medio de la terminal (\texttt{telnet}) y la interfaz de línea comandos que provee el fabricante para su configuración. Estas son funciones de administración: se cambia el comportamiento del dispositivo a través de su configuración. En el dispositivo también se puede habilitar un protocolo de enrutamiento. Los protocolos de enrutamiento actúan como protocolos del plano de control: cambian la forma en lo que paquetes son enrutados a través de la red. Estos protocolos no cambian la configuración del dispositivo, solamente cambian el comporamiento de enrutamiento, administran las tablas de ruteo las cuales determinan cómo los paquetes fluyen por el dispositivo.
+
+
+
+
+\section{El Protocolo OpenFlow}
+\textsc{OpenFlow} es el primer protocolo estándar que trabaja entre la capa de control. Permite el acceso directo y el manejo de los dispositivos físicos o virtuales. El protocolo especifica primitivas básicas que pueden ser usadas por aplicaciones externas para programar los dispositivos de  red. Por ejemplo, un programa que se cree para controlar la carga de red puede implementar OpenFlow para crear la comunicación entre los dispositivos de la red y el software, similar a las instrucciones de CPU que interactúan entre el sistema operativo y el hardware. 
+
+El protocolo permite también definir como el tráfico de la red en base a parámetros como patrones de uso, aplicaciones y recursos de la nube. Provee un control granular que permite a la red responder a cambios en tiempo real a nivel de aplicación, usuario y sesión. 
+
+Actualmente es el único protocolo de SDN estandarizado que permite la manipulación de la red.  
+
+Parte de los beneficios de usar este protocolo está la centralización del control de ambientes de diferentes proveedores de dispositivos físicos/virtuales, reducir la complejidad del mantenimiento de la red mediante la automatización de procesos, innovación al permitir al programador crear aplicaciones según las necesidades del negocio, aumenta la seguridad de la red pues permite una configuración de alto nivel de políticas de seguridad, configuraciones dinámicas aplicables en pocas horas que reducen el \emph{``time-to-market''} del negocio, control granular de la red al aplicar políticas o configuraciones según diferentes niveles de distribución y carga.
+
+\subsection{Otros protocolos e iniciativas}
+
+
 
 % needed in second column of first page if using \IEEEpubid
 %\IEEEpubidadjcol
-
-\subsubsection{Subsubsection Heading Here}
-Subsubsection text here.
 
 
 % An example of a floating figure using the graphicx package.
@@ -750,6 +885,16 @@ The authors would like to thank...
 H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
   0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
 
+\bibitem{onf}
+Open Networking Foundation. \url{https://www.opennetworking.org/sdn-definition/}
+
+\bibitem{rexford}
+N.~ Feamster, J.~Rexford, and E.~Zegura. 2013. \emph{The Road to SDN}.\hskip 1em plus
+  0.5em minus 0.4em\relax Queue 11, 12. December 2013.
+  
+\bibitem{goransson}
+P.~Goransson and C.~Black. \emph{Software Defined Networks: A Comprehensive Approach}.\hskip 1em plus 0.5em minus 0.4em\relax Elsevier Science. 2016.
+  
 \end{thebibliography}
 
 % biography section

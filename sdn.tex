@@ -661,6 +661,7 @@ A nivel conceptual, el comportamiento y operación de una red SDN es sencillo. E
 
 Un flujo describe un conjunto de paquetes transferidos desde un punto final de la red (\emph{network endpoint}) hacia otro punto final de la red (o conjunto de puntos). Un conjunto de reglas describe las acciones que el dispositivo debería toma para todos los paquetes que le pertenecen a ese flujo. Un flujo \emph{flow} es unidireccional en que los paquetes que fluyen entre los mismos dos \emph{endpoints}, en la dirección opuesta podrían constituir cada uno un flujo separado. Los flujos se representan en un dispositivo como una entrada de flujo (\emph{flow entry}).
 
+\label{sec:tabla-flujos}
 Una tabla de flujos reside en el dispositivo de red y consiste de una serie de entradas de flujo y las acciones a realizar cuando un paquete entrante coincide un flujo. Cuando el dispositivo SDN recibe un paquete, consulta su tabla de flujos en busca de una coincidencia. Estas tablas de flujos se han construido previamente cuando el controlador descargó las reglas de flujo apropiadas al dispositivo. Si el dispositivo SDN encuentra una coincidencia entonces realiza la acción configurada apropiada que usualmente implica reenviar un paquete. Si no encuentra una coincidencia, el dispositivo puede soltar (\emph{drop}) el paquete o pasarlo al controlador, dependiendo de la versión el protocolo y la configuration que tenga. La definición de un flujo es una expresión de programación relativamente simple de lo que lo que puede ser un cálculo de plano de control muy complejo realizado previamente por el controlador.
 
 El controlador SDN es responsable de abstraer la red de los dispositivos SDN que controla y presentar una abstracción de estos recursos de red a las aplicaciones SDN ejecutándonse por encima de sí. El controlador le permite a las aplicaciones SDN a definir flujos en los dispositivos y ayuda a la aplicación a responder a paquetes que fueron reenviados al controlador por los dispositivos SDN. En la figura \ref{fig:operation-sdn} se puede ver en la parte derecha del controlador que se mantiene una vista de la totalidad de la red que controla. Esto permite calcular soluciones de reenvio óptimas de una forma determinística y predecible. Debido a que un controlador puede control un gran número de dispositivos, estos cálculos son normalmente realizados en un equipo de alto rendimiento el cual posee mejor CPU y memoria que los que vienen típicamente en los dispositivos de red.
@@ -670,6 +671,22 @@ Las aplicaciones SDN están construidas por encima del controlador. Estas aplica
 Además de los flujos definidos proactivamente por la aplicación, algunos flujos son definidos para responder a un paquete enviado al controlador. Al recibir los paquetes entrantes que han sido reenviados al controlador, la aplicación SDN dara instrucciones al controlador para darle a conocer cómo responder al paquete y, si es apropiado, establecerá nuevos flujos en el dispositivo con el fin de permitir que el dispositivo responda localmente la próxima vez que vea un paquete que le pertenezca a ese flujo. Tales flujos se llaman flujos reactivos. De esta forma, ahora es posible escribir aplicaciones de software que implementan envío, ruteo, superposición (\emph{overlay}), \emph{multipath}, funciones de control de acceso, entre otros.
 
 \subsubsection{Dispositivos SDN}
+Un dispositivo SDN está compuesto por un API para comunicación con el controlador, una capa de abstracción y una función de procesamiento de paquetes. En el caso de un \emph{switch} físico, la función de procesamiento de paquetes está contenida en el hardware para procesamiento lógico de paquetes 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{physical-switch}
+    \caption{Anatomía del hardware un \emph{switch} SDN. Fuente: \emph{Open Networking Foundation}}
+    \label{fig:sdn-arquitectura}
+\end{figure}
+
+La capa de abstracción incorpora una o más tablas de flujos. La lógica de procesamiento de paquetes consiste de mecanismos par tomar acciones basado en los resultados de la evaluación los paquetes entrantes y de buscar la coincidencia de prioridad más alta. Cuando una coincidencia se encuentra, los paquetes entrantes son procesados localmente, a menos que explícitamente se usa una regla para enviar al controlador. Cuando no se encuentra una coincidencia, el paquete puede ser copiado al controlador para procesamiento posterior. En el caso de un \emph{switch} de hardware, estos mecanismos son implementados por hardware especializado. En el caso de un \emph{switch} de software, estas mismas funciones son hechas por software.
+
+\paragraph{Tablas de flujos} son estructuras de datos fundamentales en un dispositivo SDN. Estas tablas de flujos permiten al dispositivo evaluar paquetes entrantes y llevar a cabo una acción apropiada basada en los contenidos del paquete que se acaba de recibir. Los paquete ha sido tradicionalmente recibidos por dispositivos de red y evaluados en función de ciertos campos. Dependiendo de la evaluación, se realiza una acción. Las acciones que se pueden tomar fueron anteriormente comentadas en la sección \ref{sec:tabla-flujos}. Un dispositivo SDN no es fundamentalmente diferente, excepto que esta operación básica se ha vuelto más genérica y más programable a través de las tablas de flujo y su lógica asociada.
+
+Las tablas de flujos consisten de un número de entradas de flujos con prioridades asociados, cada de los cuales consiste típicamente de dos componentes: \emph{match fields} y \emph{match actions}. Los \emph{match fields} son usados para compararlo contra los paquetes entrantes. Un paquete entrada se compara contra un \emph{match field} en orden prioritario y la primeria coincidencia completa se selecciona. Las acciones son las instrucciones que el dispositivo de red debería de realizar si un paquete entrante coincide con los \emph{match fields} escificados para una entrada de flujo.
+
+
 
 \subsubsection{Controlador SDN}
 
@@ -882,11 +899,12 @@ The authors would like to thank...
 \begin{thebibliography}{1}
 
 \bibitem{IEEEhowto:kopka}
-H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
-  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
 
 \bibitem{onf}
 Open Networking Foundation. \url{https://www.opennetworking.org/sdn-definition/}
+
+\bibitem{onf2}
+Open Networking Foundation. \emph{Software-Defined Networking: The new Norm for Networks}.\hskip 1em plus 0.5em minus 0.4em\relax White Paper. Abril, 2012.
 
 \bibitem{rexford}
 N.~ Feamster, J.~Rexford, and E.~Zegura. 2013. \emph{The Road to SDN}.\hskip 1em plus
@@ -894,6 +912,7 @@ N.~ Feamster, J.~Rexford, and E.~Zegura. 2013. \emph{The Road to SDN}.\hskip 1em
   
 \bibitem{goransson}
 P.~Goransson and C.~Black. \emph{Software Defined Networks: A Comprehensive Approach}.\hskip 1em plus 0.5em minus 0.4em\relax Elsevier Science. 2016.
+
   
 \end{thebibliography}
 
@@ -909,12 +928,12 @@ P.~Goransson and C.~Black. \emph{Software Defined Networks: A Comprehensive Appr
 % or if you just want to reserve a space for a photo:
 
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{priscilla-piedra}}]{Priscilla Piedra}
-es Ingeniera de Computación del Instituto Tecnologíco de Costa Rica. Actualmente es estudiante del programa de maestría en Computación en la misma universidad. Sus principales intereses son: \emph{cloud computing} y automizatización. 
+es Ingeniera de Computación del Tecnologíco de Costa Rica. Actualmente es estudiante del programa de Maestría en Ciencas de la Computación en la misma universidad. Sus principales intereses son: \emph{cloud computing} y automatización. 
 \end{IEEEbiography}
 
 % if you will not have a photo at all:
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{martin-flores}}]{Martín Flores}
-Biography text here.
+es Ingeniero en Informática de la Universidad Nacional. Actualmente, realiza sus estudios de Maestría en Ciencias de la Computación del Tecnológico de Costa Rica. Sus principales intereses son: lenguajes de programación, ingeniería de software y \emph{DevOps}.
 \end{IEEEbiography}
 
 % insert where needed to balance the two columns on the last page with

@@ -687,14 +687,71 @@ La capa de abstracción incorpora una o más tablas de flujos. La lógica de pro
 Las tablas de flujos consisten de un número de entradas de flujos con prioridades asociados, cada de los cuales consiste típicamente de dos componentes: \emph{match fields} y \emph{match actions}. Los \emph{match fields} son usados para compararlo contra los paquetes entrantes. Un paquete entrada se compara contra un \emph{match field} en orden prioritario y la primeria coincidencia completa se selecciona. Las acciones son las instrucciones que el dispositivo de red debería de realizar si un paquete entrante coincide con los \emph{match fields} escificados para una entrada de flujo.
 
 
+\paragraph{\emph{Switches} SDN en software}
+La implementación de dispositivos SDN en software es la forma más simple de crear un dispositivo SDN debido que las tablas de flujos, entradas y los \emph{match fields} involucrados son fácilmente mapeado a estructuras de software, taes como arreglos ordenados y tablas de \emph{hash}. Consecuentemente, es más problable que dos dispositivos SDN en software producidos por dos equipos de desarrollo distintos se van a comportar de forma más consistente que en el caso de dos implementaciones en hardware diferentes. Por otro lado, las implementaciones en software tienden a ser más lentas y menos eficientes que aquellas implementadas en hardware ya que no se benefician de ninguna aceleración de hardware. Dispositivos de red que tengan que trabajar a altas velocidades, como 100Gbs, solamente dispositivos de hardware son factibles con las tecnología actual.
+
+\paragraph{Dispositivos SDN de hardware}
+Las implementaciones de dispositivos SDN en hardware mantienen la promesa de operar mucho más rápido que su contraparte de software y, por lo tanto, más apropadiado para entornos sensibles al rendimiiento tal y como centros de datos y núclos de red (\emph{network cores})
+
+\paragraph{Implementaciones de dispositivos SDN existentes}
+Hay una serie de dispositivos SDN disponibles hoy en día tanto comerciales como de código abierto. Los dispositivos SDN en software son predominantemente de código abierto. Actualmente, dos alternativas principales están disponibles: \emph{Open vSwitch}\footnote{de Nicira, hoy VMWare } y \emph{Indigo}\footnote{de Big Switch}. Fabricantes como Cisco, HP, NEC, IBM, Juniper y Extreme han añadido soporte a \textsc{OpenFlow} en algunos de sus \emph{switches}. Generalmente, estos \emph{switches} puede operan en modo \emph{legacy} también como en modo \textsc{OpenFlow}.
+
 
 \subsubsection{Controlador SDN}
+Se ha mencionado que el controlador mantiene una vista del total de la red, implementando políticas de decisión, contralando todos los dispositivos SDN que componen la infraestructura de la red y proporcionando una API \emph{northbound} para las aplicaciones. Cuando se dice que el controlador implementa políticas de decisión respecto al ruteo, envío, redirección, balanceo de carga y similares, se refiere tanto al controlador como a las aplicaciones que hacen uso de ese controlador. Los controladores usualmente vienen con su propio conjunto de módulos de aplicaciones comunes tales como un \emph{switch} de aprendizaje, un ruteador, un \emph{firewall} básico y un balanceador de carga simple. Estos son realmente aplicaciones SDN pero por lo general vienen empaquetados con el controlador.
+
+La figura \ref{fig:sdn-controlador-1} presenta la anatomía de un controlador SDN. La figura muestra los módulos que proporcionan la funcionalidad principal del controlador: los APIs \emph{northbound} y \emph{southbound} y algunas aplicaciones de ejemplo que podría usar el controlador. Como se mencionó anteriormente, el API \emph{southbound} se usa para interconexio4n con los dispositivos SDN. Este API es \textsc{OpenFlow} en el caso de una red que utilicen estándares abiertos SDN. Cabe mencionar que en algunos productos \textsc{OpenFlow} y otras alternativas coexisten en el mismo controlador. El trabajo previo en el API \emph{southbound} ha dado como resultado mayor madurez con respecto a su definición y estandarización. \textsc{OpenFlow} es un buen ejemplo de esto.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{controller-1}
+    \caption{Anatomía de un controlador SDN. Fuente: \emph{Open Networking Foundation}}
+    \label{fig:sdn-controlador-1}
+\end{figure}
+
+Actualmente, el \emph{Open Source SDN}\footnote{\url{http://www.opensourcesdn.org}} está proponiendo un estándar para la contraparte \emph{northbound} del controlador tal y como \textsc{OpenFlow} lo es para el \emph{southbound}. Mientras que la falta de un estándar para la interfaz controlador-aplicacioen es considerada como una deficiencia en SDN, organizaciones como el \emph{Open Source SDN} están desarrollando propuestas para estandarizar esto. Debido a la ausencia de un estándar, varios otros han sido implementados de forma dispar.
+
+\paragraph{Módulos principales de controlador SDN}
+Las principales características en el controlador involucran:
+\begin{itemize}
+    \item Descubrimiento de dispositivos de usuario final: descubrimiento de dispositivos de usuario final tal y como computadoras personales, impresoras, dispositivos móviles, etc.
+    \item Descubrimiento de dispositivos de red: descubrimiento de dispositivos de red que comprenden la infraestructura de la red tal y como \emph{switches}, enrutadores y puntos de acceso inalámbricos.
+    \item Gestión de la topología de los dispositivos de red: mantener informa acerca de los detalles de interconexión de los dispositivos de red entre sí y sobre los dispositivos de usuario final a los que están directamente conectados.
+    \item Gestión de flujos: mantener una base de datos de los flujos mantenidos por el controlador y realizar toda la coordinación necesaria con los dispositivos para asegurar la sincronización de las entradas de los flujos de los dispositivos con la base de datos.
+\end{itemize}
+
+Las funciones principales del controlador son descubrimiento y rastreo de dispositivos y topología, gestión de flujos, gestio4n de dispositivos y estadísticas de rastrio. Todas estas funciones son implementadas por un conjunto de módulos internos del controlador. Como se muestra en la figura \ref{fig:sdn-controlador-1} esos módulos mantienen bases de datos locales que contienen la topología actual y estadísticas. El controlador rastra la topología al aprender de la existencia de \emph{switches} (dispositivos SDN) y dispositivos de usuario final y rastrea la conectividad entre ellos. Mantiene un caché de flujos que refleja las tablas de flujos en los diferentes \emph{switches} que controla. El controlador mantiene localmente estadísticas por flujo que son obtenidas de sus \emph{switches}. El controlador puede ser diseñado de tal forma que sus funciones sean implementadas a través de módulos de tal forma que el conjunto de características del controlador pueda adaptarse a los requerimientos individuales de una red.
+
+\paragraph{Interfases de un controlador SDN}
+Para las aplicaciones SDN, un función clave proporcionada por el controlador SDN es el API para acceder a la red. En algunos casos, esta API \emph{northbound} es una interfaz de bajo nivel, proporcionando acceso a los dispositivos de red en una forma común y consistente. En otros casos el controlador puede proporcionar interfases de alto nivel que proveen una abstracción de la red como tal, de esta forma un desarrollador de aplicaciones no necesita estar preocupado de dispositivos individuales sino de la red como un todo.
+
+En la figura \ref{fig:sdn-controlador-2} se muestra de cerca cómo el controlador se interconecta con las aplicaciones. El controlador informa a la aplicación de los eventos que han ocurrido en la red. Los eventos son comunicados desde el controlador a la aplicación. Los eventos pueden pertenecer a un paquete individual que ha sido recibido por el controlado o ser algún tipo de cambio en la topología de la red tal y como la caída de un enlace. Las aplicaciones usan diferentes métdosos para afectar la operación de la red. Tales métodos pueden ser invocados en respuesta a un evento recibido y puede resultar en un paquete recibido que se cae (\emph{dropped}), se modifica y/o se envía, o bien, la agregación, borrado o modificación de un flujo. Las aplicaciones tambien puede invocar métodos independientemente sin la necesidad del estímulo de un evento del controlador.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{controller-2}
+    \caption{API \emph{northbound} de un controlador SDN. Fuente: \emph{Open Networking Foundation}}
+    \label{fig:sdn-controlador-2}
+\end{figure}
+
+\paragraph{Implementaciones de controladores SDN existentes}
+Existe una seria de implementaciones de controladores SDN disponibles en la actualidad que incluyen soluciones comerciales y de código abierto. Los controladores de código abierto vienen en varias formas, desde controladores hechos en lenguaje C como NOX, a versiones en java como \emph{Beacon} y \emph{Floodlight}. Las interfases a estos controladores pueden ser ofrecidas en el lenguaje en el que está escrito el controlador o en otras alternativas como REST o Python. El controlador \emph{OpenDayLight} ha sido construido por un consorcio de fabricantes. Otro importante controlador de código abierto, \emph{Open Network Operating System} está ganando atención en el mercado. Otros fabricante ofrecen sus propias versiones comerciales de controlador SDN.  Fabricantes como NEC, IBM y HP ofrecen sus propios controladores que son en principalmente implementaciones de \textsc{OpenFlow}. La mayoría de fabricantes ofrecen controladores SDN específicos y propietarios que incluyen algún nivel de soporte de \textsc{OpenFlow}.
 
 \subsubsection{Aplicaciones SDN}
+Las aplicaciones SDN que corren por encima del controlador SDN se interconectan con la red a través de API \emph{northboud} del controlador. Las aplicaciones SDN son responsables en última instancia de administrar las entradas de flujos que son programadas en los dispositivos de red usando el API del controlador de gestión de flujos. A través de este API las aplicaciones están en la capacidad de: (1) configurar los flujos para enrutar los paquetes por al mejor ruta entre dos puntos, (2) balancear la carga de tráfico a través de rutas múltiples o destinarlas a un conjunto de \emph{endpoints}, (3) reaccionar a cambios en la topología de red como fallos en los enlaces y la agregacio4n de nuevos dispositivos y rutas y (4) redireccionar tráfico para propósitos de inspección, autenticación, segregación y otros tareas similares de seguridad.
+
+
+En la figura \ref{fig:sdn-controlador-1} se muestra algunas de las aplicaciones comunes como la interfaz gráfica para gestionar el controlar, un \emph{switch} de aprendizaje y una aplicación de ruteo. Cabe mencionar que incluso la funcionalidad básica de un \emph{switch} de aprendizaje de dos capas no se obtiene simplemente emparejando un dispositivo SDN con un controlador SDN. Lógica adicional es necesaria para reaccionar a la nueva dirección MAC vista y actualizar las tablas de envío en los dispositivos SDN que son controlados para que se proporcione conectividad a esta nueva dirección MAC en toda la red. Una de las fortalezas que se percibe de la arquitectura SDN es el hecho que las decisiciones de \emph{switching} pueden ser controladas una familia de aplicaciones más enriquecida aún que para gestionar el controlador. De esta forma, se nota que el poder de esta  arquitectura es que es altamente expansible. Otras aplicaciones como balanceadores de carga y \emph{firewalls} son buenos candidatos para esta arquitectura. 
+
+\paragraph{Responsabilidades de las aplicaciones SDN}
+La responsabilidad general de una aplicación SDN es la de realizar cualesquiera función para la cual fue diseñada, puede ser balanceo de carga, bloqueo de accesos no autorizados o cualquier otra operación. Una vez que el controlador ha finalizado la inicialización de los dispositivos y ha reportado la topología de la red a la aplicación, la aplicación invierte la mayoría de su tiempo de procesamiento en eventos. Mientras que la funcionalidad principal de la aplicación va a variar de una aplicación a la otra, el comportamiento de la aplicación es conducido por los eventos que vienen desde el controla asi como entradas externas. Las entradas externas podrían incluir sistemas de monitoreo de la red tales como NetFlow, sistemas de monitoreo de intrusos o BGP\footnote{Border Gateway Protocol}. La aplicación afecta a la red al responder a los eventos tal y como se muestra en la figura \ref{fig:sdn-controlador-2}. La aplicación SDN se registra como oyente para ciertos eventos y el controlador invocará un método de aplicación cuando un evento ocurra. Esta invocación vendrá acompañada por los detalles apropiados relacionados con el evento. Algunos ejemplos de eventos manejados por una aplicación SDN son: descubrimiento de dispositivos de usuario finall, descubrimiento de dispositivos de red y paquetes entrantes. En los primeros dos casos, los eventos son enviados a la aplicación SDN al descubrir un nuevo dispositivo de usuario final (por ejemplo, una dirección MAC) o un dispositivo de red (por ejemplo, un \emph{switch}, un enrutador, o un punto de acceso inalámbrico) respectivamente. Los paquetes entrantes son enviados a la aplicación SDN cuando un paquete es recibido desde un dispositivo SDN ya sea debido a una entrada de flujo que instruye al dispositivo SDN para reenviar el paquete al controlador, o porque no hay entrada de flujo coincidente en el dispositivo SDN. Cuando no hay una entrada de flujo que coincida, la acción predeterminada suele ser reenviar el paquete al controlador, aunque también podría ser eliminar el paquete, dependiendo de la naturaleza de las aplicaciones.
+
+Existen muchas formas en las cuales una aplicación SDN puede responder a los eventos que ha recibido de un controlador SDN. Existen respuestas simples, tal y como descargar un conjunto de entradas de flujo predeterminadas a un nuevo dispositivo descubierto. Estos flujos estáticos o predeterminados típicamente son las mismas para cada clase de dispositvo de red descubierto y, por ende, muy poco procesamiento es requerido por la aplicación. También hay respuestas más complejas que pueden requerir información de estado obtenida de alguna otra fuente aparte del controlador.
+
 
 
 %\textbf{======================================}
-%Control: se encuentran los controladores SDN y aplicaciones escritas por programadores que interactúan con el controlador utilizando lo que se conoce como la interfase \emph{Northboud}. Para interactuar con los dispositivos de la red, el controlador usa la interfase \emph{Softboud}. El controlador envía mensajes a los dispositivos usando varios protocolos -- Uno de ellos es \textsc{OpenFlow} - en la intefase \emph{Softbound}. A diferencia de un \emph{switch} o \emph{router} tradicional, en un ambiente SDN puro el cerebro del dispositivo de red es removido del mismo y se coloca en la capa de control en un dispositivo por separado.
+%Control: se encuentran los controladores SDN y aplicaciones escritas por programadores que interactúan con el controlador utilizando lo que se conoce como la interfase \emph{Northboud}. Para interactuar con los dispositivos de la red, el controlador usa la interfase \emph{Softboud}. El controlador envía mensajes a los dispositivos usando varios protocolos -- Uno de ellos es \textsc{OpenFlow} - en la intefase \emph{Softbound}. A diferencia de un \emph{switch} o \emph{router} tradicional, en un ambiente SDN puro el cerebro del dispositivo de red es removido del mismo y se coloca en la capa de control en un dispositivo por separado. 
 
  
 
@@ -843,27 +900,25 @@ The conclusion goes here.
 %
 
 
-\appendices
-\section{Proof of the First Zonklar Equation}
-Appendix one text goes here.
-
-% you can choose not to have a title for an appendix
-% if you want by leaving the argument blank
-\section{}
-Appendix two text goes here.
+%\appendices
+%\section{Proof of the First Zonklar Equation}
+%Appendix one text goes here.
+%
+%\section{}
+%Appendix two text goes here.
 
 
 % use section* for acknowledgment
-\ifCLASSOPTIONcompsoc
-  % The Computer Society usually uses the plural form
-  \section*{Acknowledgments}
-\else
-  % regular IEEE prefers the singular form
-  \section*{Acknowledgment}
-\fi
+%\ifCLASSOPTIONcompsoc
+%  % The Computer Society usually uses the plural form
+%  \section*{Acknowledgments}
+%\else
+%  % regular IEEE prefers the singular form
+%  \section*{Acknowledgment}
+%\fi
 
 
-The authors would like to thank...
+%The authors would like to thank...
 
 
 % Can use something like this to put references on a page
@@ -897,8 +952,6 @@ The authors would like to thank...
 % set second argument of \begin to the number of references
 % (used to reserve space for the reference number labels box)
 \begin{thebibliography}{1}
-
-\bibitem{IEEEhowto:kopka}
 
 \bibitem{onf}
 Open Networking Foundation. \url{https://www.opennetworking.org/sdn-definition/}

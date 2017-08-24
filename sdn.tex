@@ -578,6 +578,7 @@ La virtualización de redes también jugó un rol importante a través de la evo
     \label{fig:tradicitional-architecture}
 \end{figure*}
 
+Este documento presneta: 3) Definición de SDN a traves de su arquitectura, características fundamentales y operativa; 4) introduccion al protocolo \textsc{OpenFlow}, sus principales características, beneficios y otros protocolos relacionados a SDN.  
 
 \section{Software Defined Networks}
 
@@ -771,35 +772,65 @@ En 2011 un consorcio sin fines de lucro crea la ONF (\emph{Open Networking Found
 
 Los componentes del modelo de OpenFlow son:
 \begin{enumerate}
-    \item Separación del plano de control y datos.
-    \item Usar un protocolo estandarizado entre el controlador y el agente en el elemento de red para para instanciar el estado.
-    \item A través de un API centralizado proveer programabilidad a la red.
+    \item Separación del plano de control y de datos en los dispositivos de red.
+    \item Usar un protocolo estandarizado entre el controlador y el dispositivo de red para manejar el comportamiento del mismo.
+    \item A través del controlador se busca proveer programabilidad a la red. 
 \end{enumerate}
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{openFlow1}
+    \caption{Arquitectura \textsc{OpenFlow}. Fuente: \emph{NSRC, Introduccion a OpenFlow.}}
+    \label{fig:Arquitectura OpenFlow}
+\end{figure}
 
-\textsc{OpenFlow} es un conjunto de protocolos y API, no es un producto \emph{per se}, más bien se busca que el controlador interactúe con un programa de aplicación que dé instrucciones para manejar los flujos de los dispositivos físicos o virtuales.
+\textsc{OpenFlow} busca que el controlador que conecta a todos los dispositivos interactúe con un programa de aplicación que ejecute instrucciones para manejar los flujos de la red. Así se busca el controlador sea el que determine el flujo de la red, gestionando la red como un todo y no individualmente según cada dispositivo, logrando que la red pueda ser programada de forma independiente al equipo. 
 
-El protocolo especifica primitivas básicas que pueden ser usadas por aplicaciones externas para programar los dispositivos de red. Por ejemplo, un programa que se crea para controlar la carga de red puede implementar \textsc{OpenFlow} para crear la comunicación entre los dispositivos de la red y el software, similar a las instrucciones de CPU que interactúan entre el sistema operativo y el hardware.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{openFlow2}
+    \caption{Reprecentación del controlador \textsc{OpenFlow} enlazado con los dispositivos de red. Fuente: \emph{NSRC, Introduccion a OpenFlow.}}
+    \label{fig:Arquitectura OpenFlow}
+\end{figure}
 
-Los protocolos \textsc{OpenFlow} normalmente se dividen en dos partes:
+El protocolo especifica primitivas básicas que pueden ser usadas por aplicaciones externas para programar los dispositivos de  red. Por ejemplo, un programa que se cree para controlar la carga de red puede implementar OpenFlow para crear la comunicación entre los dispositivos de la red y el software, similar a las instrucciones de CPU que interactúan entre el sistema operativo y el hardware. 
+
+\textsc{OpenFlow} permite también definir el tráfico de la red en base a parámetros como patrones de uso, aplicaciones y recursos de la nube. Provee un control granular que permite a la red responder a cambios en tiempo real a nivel de aplicación, usuario y sesión. 
+
+
+\subsubsection{Switch OpenFlow}
+
+Un switch que soporte \textsc{OpenFlow} contiene:
 \begin{enumerate}
-    \item Un protocolo de cableado (emph{wire protocol}) para establecer el control de la sesión, definir una estructura de mensaje para el intercambio de modificaciones en la red, recolectar estadísticas y definir la estructura básica de \emph{switch} (definir puertos y tablas).
-    \item Un protocolo de administración y configuración para asignar los puertos físicos de los \emph{switches} a un controlador en particular. También define alta disponibilidad y comportamientos en caso de una falla de conexión con el controlador. 
+    \item Tabla de flujos, donde se relaciona una acción con una entrada de la tabla indicando al dispositivo como se debe procesar el flujo de red. Cada tabla en el switch contiene un conjunto de entradas de flujo donde cada entrada consiste en campos de coincidencia, contadores y un conjunto de instrucciones para aplicar a los paquetes.
+    \item Canal seguro, el mismo conecta al dispositivo con el controlador permitiendo el paso de comandos y paquetes usando el protocolo OpenFlow.
+    \item Controlador, que administra la tabla de flujos para permitir cambios en el dispositivo. El controlador puede agregar y eliminar entradas de flujos en las tablas. 
 \end{enumerate}
 
-\textsc{OpenFlow} busca un \emph{northbound} API que exponga la topología y que provea servicios a una aplicación sobre el controlador, también un protocolo \emph{southbound} estándar para la comunicación entre equipos de diferentes proveedores. Así se busca que un servidor de software sea el que determine el flujo de la red, gestionando la red como un todo y no individualmente según cada dispositivo, así la red puede ser programada de forma independiente al equipo. 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{openFlow3}
+    \caption{Switch \textsc{OpenFlow}.Fuente: \emph{NSRC, Introduccion a OpenFlow.}}
+    \label{fig:Arquitectura OpenFlow}
+\end{figure}
 
-El protocolo permite también definir como el tráfico de la red en base a parámetros como patrones de uso, aplicaciones y recursos de la nube. Provee un control granular que permite a la red responder a cambios en tiempo real a nivel de aplicación, usuario y sesión. 
+Para inicializar un switch nuevo requiere de configuración mínima (como establecer la dirección IP, el gateway y definir el controlador \textsc{OpenFlow}), se debe conectar al controlador el cual inicia una serie de peticiones al dispositivo mediante funciones, como por ejemplo determinar la ubicación del dispositivo.
 
-Parte de los beneficios de usar este protocolo está en la centralización del control de ambientes de diferentes proveedores de dispositivos físicos/virtuales, reducir la complejidad del mantenimiento de la red mediante la automatización de procesos, innovación al permitir al programador crear aplicaciones según las necesidades del negocio, aumenta la seguridad de la red pues permite una configuración de alto nivel de políticas de seguridad, configuraciones dinámicas aplicables en pocas horas que reducen el \emph{``time-to-market''} del negocio, control granular de la red al aplicar políticas o configuraciones según diferentes niveles de distribución y carga.
+Hay dos formas de poblar una tabla de flujos: de forma proactiva o reactiva. Proactivamente las reglas son estáticas y el controlador coloca las reglas en el switch antes de que estas sean requeridas mientras que de forma reactiva las reglas son dinámicas. De forma reactiva los paquetes son enviados al controlador donde este crea la regla apropiada enviando el paquete de vuelta al switch para definir la regla. 
+
+\subsubsection{Beneficios}
+Parte de los beneficios de usar este protocolo está la centralización del control de ambientes de diferentes proveedores de dispositivos físicos/virtuales, reducir la complejidad del mantenimiento de la red mediante la automatización de procesos, innovación al permitir al programador crear aplicaciones según las necesidades del negocio, aumenta la seguridad de la red pues permite una configuración de alto nivel de políticas de seguridad, configuraciones dinámicas aplicables en pocas horas que reducen el “time-to-market” del negocio, control granular de la red al aplicar políticas o configuraciones según diferentes niveles de distribución y carga.
 
 
 \subsection{Otros protocolos e iniciativas}
-Border Gateway protocol, 
-NETCONF
-XMPP
-OVSDB
-MPLS-TP
+Existen otros protocolos SDN diferentes a OpenFlow, por ejemplo:
+\begin{enumerate}
+    \item Border Gateway protocol:  Utilizado para el intercambio de información de rutas entre host de gateways en una red. Es considerado un protocolo de gateway exterior donde cada host tiene su propio router, la tabla de enrutamiento tiene una lista de routers conocidos, las direcciones visibles y una métrica de costo asociada a cada ruta. 
+    \item NETCONF: Este protocolo busca proporcionar una red segura basado en el procedimiento remoto RPC. 
+    \item XMPP: El protocolo de presencia y mensajería extensible se basa en el Extensible Markup Language para el uso de mensajería instantánea funcionando entre los servidores, brindando una operación en tiempo real. Es utilizado en redes SDN híbridas, siendo utilizado por el controlador para distribuir información de plano de control como de gestión del plano a los puntos finales del servidor.
+    \item OVSDB: Es un protocolo de configuración de OpenFlow destinado a administrar las implementaciones de Open vSwitch el cual es un conmutador virtual que permite la automatización de la red y el soporte de interfaces como NetFlow.
+    \item MPLS-TP: Es un tipo de técnica para el manejo de datos para redes de alto rendimiento. Direcciona datos de un nodo de red al mas proximo basado en etiquetas de recorrido lo cual elimina la complejidad de buscar en tablas de ruteo. Las etiquetas identifican links virtuales entre nodos distantes. El protocolo puede encapsular paquetes de diferentes protocolos de red.
+\end{enumerate}
 
 
 
@@ -906,7 +937,9 @@ MPLS-TP
 
 
 \section{Conclusion}
-The conclusion goes here.
+
+SDN propone una arquitectura que permite trabajar las redes de forma ágil, programable y centralizada donde el manejo de la red puede ser configurado mediante programación.
+Al ser un ambiente programado los administradores de red tienen la libertad para asegurar, optimizar y automatizar los recursos de la red creando programas escritos por ellos mismos pues SDN está basado en estándares abiertos y neutrales donde no se depende de un software propietario. La arquitectura busca simplificar la operación y el diseño de la red, dejando atrás la forma tradicional de trabajo de redes.
 
 
 
@@ -998,6 +1031,12 @@ P.~Goransson and C.~Black. \emph{Software Defined Networks: A Comprehensive Appr
 
 \bibitem{slattery}
 T.~Slattery. \emph{An Introduction to Software Defined Networking (SDN) LiveLessons—Networking Talks}.\hskip 1em plus 0.5em minus 0.4em\relax Pearson IT Certification. ISBN: 0133987337. Junio, 2014.
+
+\bibitem{slattery}
+NSRC. \emph{Introduccion a OpenFlow}.
+
+\bibitem{slattery}
+M.~McNickle. \emph{Cinco protocolos SDN que no son OpenFlow}.\hskip 1em plus 0.5em minus 0.4em\relax TechTarget.
 
   
 \end{thebibliography}
